@@ -5,14 +5,24 @@ if (!config.token) return console.log("You didn't provide a valid token in confi
 
 client.commands = new Discord.Collection();
 
+client.on('ready', () => {
+    console.log('Ready')
+});
+
 client.on('message', async message =>{
 
     if (message.author.bot) return;
     if (!message.channel.permissionsFor(client.user.id).has(['SEND_MESSAGES', 'READ_MESSAGE_HISTORY', 'EMBED_LINKS'])) return;
     if (!config.channel_id) {
-    console.log(`\`[${message.guild} (${message.guild.id})] \n#${message.channel.name} (${message.channel.id}): \n(${message.author.username} (${message.author.id})): \n${message.content}\``)
+    console.log(`[${message.guild} (${message.guild.id})] \n#${message.channel.name} (${message.channel.id}): \n(${message.author.username} (${message.author.id})): \n${message.content}`)
+} else if (message.attachments.size){
+    message.attachments.forEach(attachment => {
+        const ImageLink = attachment.proxyURL;
+        client.channels.fetch(config.channel_id).then(channel => channel.send(`\`[${message.guild} (${message.guild.id})] \n#${message.channel.name} (${message.channel.id}): \n(${message.author.username} (${message.author.id})):\`\n\n${message.content}${ImageLink}`));
+        return;
+    });
 } else {
-    message.guild.channels.cache.get(config.channel_id).send(`\`Server: ${message.guild}\nServer ID: (${message.guild.id})\n\nChannel: ${message.channel.name}\nChannel ID: (${message.channel.id})\n\nAuthor: ${message.author.username}\nAuthor ID: (${message.author.id})\n\nMessage Content:\n${message.content}\``);
+    client.channels.fetch(config.channel_id).then(channel => channel.send(`\`[${message.guild} (${message.guild.id})] \n#${message.channel.name} (${message.channel.id}): \n(${message.author.username} (${message.author.id})):\`\n\n${message.content}`));
 }
 
 });
